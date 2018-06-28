@@ -1,0 +1,17 @@
+<h1><%= @user.user_name %></h1>
+<hr/>
+<p>
+  <strong>Age:</strong>
+  <%= @user.age %> <br/>
+</p>
+<p>
+  <strong>Discord:</strong>
+  <%= @user.discord %> <br/>
+</p>
+<p>
+  <strong>Active Game:</strong>
+  <br/>
+</p>
+
+<%= link_to '수정', root_path , class: 'btn btn-warning text-white'%> |
+<%= link_to '탈퇴', root_path, class: 'btn btn-danger' %>

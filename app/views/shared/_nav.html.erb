@@ -1,0 +1,33 @@
+<nav class="navbar navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">Gorankr</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample01" aria-controls="navbarsExample01" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExample01">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <% unless user_signed_in? %>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+            <%= link_to "Sign Up", sign_up_path, class: 'nav-link' %>
+          </li>
+          <% else %>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#">Disabled</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%= current_user.user_name %></a>
+            <div class="dropdown-menu" aria-labelledby="dropdown01">
+              <a class="dropdown-item" href="/user_info/<%= current_user.user_name %>">My Page</a>
+              <%= link_to "Sign Out", sign_out_path, method: 'delete', class: 'dropdown-item', data: {confirm: "Are you Sure?"} %>
+          </li>
+          <% end %>
+        </ul>
+        <!--<form class="form-inline my-2 my-md-0">-->
+        <!--  <input class="form-control" type="text" placeholder="Search" aria-label="Search">-->
+        <!--</form>-->
+      </div>
+    </nav>
