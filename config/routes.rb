@@ -2,6 +2,8 @@ Rails.application.routes.draw do
   resources :posts
   root 'users#sign_in'
   
+  
+  
   get 'index' => 'users#index'
   get 'sign_up' => 'users#sign_up'
   post 'sign_up' => 'users#user_sign_up'
