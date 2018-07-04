@@ -1,9 +1,8 @@
 Rails.application.routes.draw do
-  resources :posts
+  #resources :posts
   root 'users#sign_in'
-  
-  
-  
+
+  # Routing for user menus
   get 'index' => 'users#index'
   get 'sign_up' => 'users#sign_up'
   post 'sign_up' => 'users#user_sign_up'
@@ -12,6 +11,17 @@ Rails.application.routes.draw do
   get '/:user_name' => 'users#user_info', as: 'user_info'
   get '/:user_name/edit' => 'users#edit', as: 'user_edit'
   patch '/:user_name' => 'users#update', as: 'user_update'
+  
+  # Routing for game boards
+  get '/category/new' => 'categories#new'
+  post '/category' => 'categories#create'
+  get '/:game_name' => 'categories#show'
+  get '/:game_name/new' => 'posts#new', as: 'new_post'
+  get '/:game_name/:id' => 'posts#show'
+  get '/:game_name/:id/edit' => 'posts#edit'
+  post '/:game_name/:id/' => 'post#update'
+  delete '/:game_name/:id' => 'post#destroy'
+  
   
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

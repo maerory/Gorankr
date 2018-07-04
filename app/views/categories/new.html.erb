@@ -1,0 +1,5 @@
+<h1>Create new game board</h1>
+<%= form_for(@category, url: '/category') do |f| %>
+    Cafe Name: <%= f.text_field :game_name %><br/>
+    <%= f.submit 'Create Game Board' %>
+<% end %>

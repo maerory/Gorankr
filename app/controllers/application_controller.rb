@@ -11,7 +11,7 @@ class ApplicationController < ActionController::Base
   
   # 유저가 로그인 되어있지 않으면 로그인으로 보냄
   def authenticate_user!
-    redirect_to 'sign_in_path' unless user_signed_in?
+    redirect_to '/sign_in_path' unless user_signed_in?
   end
   
   # 유저가 로그인을 했으면 현재 유저 객체를 current_user에 저장해둠
