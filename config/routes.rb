@@ -11,19 +11,19 @@ Rails.application.routes.draw do
   get '/:user_name' => 'users#user_info', as: 'user_info'
   get '/:user_name/edit' => 'users#edit', as: 'user_edit'
   patch '/:user_name' => 'users#update', as: 'user_update'
-  
+
   # Routing for game boards
   get '/category/new' => 'categories#new'
   post '/category' => 'categories#create'
   get '/board/:game_name' => 'categories#show'
   get '/board/:game_name/new' => 'posts#new', as: 'new_post'
-  post '/board/:game_name/:id' => 'posts#create', as: 'posts'
+  post '/board/:game_name/' => 'posts#create', as: 'posts'
   get '/board/:game_name/:id' => 'posts#show'
   get '/board/:game_name/:id/edit' => 'posts#edit'
   post '/board/:game_name/:id/' => 'post#update'
   delete '/board/:game_name/:id' => 'post#destroy'
-  
-  
+
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
