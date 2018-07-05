@@ -25,18 +25,16 @@ class PostsController < ApplicationController
   # POST /posts.json
   def create
     @post = Post.new(post_params)
-
-    respond_to do |format|
-      if @post.save
-        format.html { redirect_to @post, notice: 'Post was successfully created.' }
-        format.json { render :show, status: :created, location: @post }
-      else
-        format.html { render :new }
-        format.json { render json: @post.errors, status: :unprocessable_entity }
-      end
+    @post.user_name = current_user.user_name
+    @post.game_name = session[:current_game_name]
+    if @post.save
+      session.delete(:current_game_name)
+      redirect_to "/board/#{@post.game_name}", flash: {success: "Post Created"}
+    else
+      render :new
     end
-  end
-
+  end  
+  
   # PATCH/PUT /posts/1
   # PATCH/PUT /posts/1.json
   def update

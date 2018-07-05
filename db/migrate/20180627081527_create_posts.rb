@@ -3,8 +3,8 @@ class CreatePosts < ActiveRecord::Migration
     create_table :posts do |t|
       t.string :title
       t.string :content
-      t.integer :user_id
-      t.integer :category_id
+      t.string :user_name
+      t.string :game_name
 
       t.timestamps null: false
     end

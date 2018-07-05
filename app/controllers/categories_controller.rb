@@ -4,8 +4,8 @@ class CategoriesController < ApplicationController
     end
     
     def show
-        @category = Category.find(params[:game_name])
-        session[:current_category] = @category.id
+        @category = Category.find_by_game_name(params[:game_name])
+        session[:current_game_name] = @category.game_name
     end
     
     def new
