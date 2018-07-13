@@ -1,6 +1,22 @@
 <h1>Editing Post</h1>
 
-<%= render 'form' %>
+<%= form_tag(post_update_path(@post), method: "PATCH") do %>
+    <div>
+    <table>
+        <tr>
+            <td align="right">Title : </td>
+            <td><%= text_field_tag("post[title]", @post.title) %> </td>
+        </tr>
+        <tr>
+            <td align="right">Content : </td>
+            <td>
+                <%= text_area_tag("post[content]", simple_format(@post.content), 'data-provider': :summernote) %>
+            </td>
+        </tr>
+    </table>
+    </div>
+    <%= submit_tag 'Edit' %>
+<% end %>
 
-<%= link_to 'Show', @post %> |
-<%= link_to 'Back', posts_path %>
+<%= link_to 'Show', :back %> |
+<%= link_to 'Back', posts_path(@post.game_name) %>

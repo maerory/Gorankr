@@ -17,7 +17,7 @@ gem 'coffee-rails', '~> 4.1.0'
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
-gem 'turbolinks'
+# gem 'turbolinks'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.0'
 # bundle exec rake doc:rails generates the API under doc/api.
@@ -31,9 +31,20 @@ gem 'bcrypt', '~> 3.1.7'
 # Use Unicorn as the app server
 # gem 'unicorn'
 
+# Summernote 
+gem 'summernote-rails', '~> 0.8.10.0'
+
+# File Uploader CarrierWave
+gem 'carrierwave', '~> 1.0'
+# Image resizer Minimagik
+gem "mini_magick"
+
+# nokogiri
+gem "nokogiri"
+
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
-
+  
 gem 'rails_db', '2.0.2'
 
 group :development, :test do

@@ -5,6 +5,8 @@ class CreatePosts < ActiveRecord::Migration
       t.string :content
       t.string :user_name
       t.string :game_name
+      t.integer :user_id
+      t.integer :category_id
 
       t.timestamps null: false
     end

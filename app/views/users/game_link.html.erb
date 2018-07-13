@@ -1,0 +1,52 @@
+<h3>게임을 연동하세요</h3>
+<hr>
+<h5>리그오브레전드</h5>
+<p>ID: <%= @user.lol_id ? @user.lol_id : '리그오브레전드를 연동해주세요!'%> </p>
+
+<%= form_tag(game_link_update_path(@user), method: "PATCH") do %>
+    <div>
+        LOL ID : 
+        <%= text_field_tag(:lol_id) %>
+    </div>
+    <%= submit_tag '등록', class: "btn btn-primary" %>
+<% end %>
+<hr/>
+<h5>오버워치</h5>
+<p>ID: <%= @user.ow_id ? @user.ow_id : '오버워치를 연동해주세요!'%> </p>
+
+<%= form_tag(game_link_update_path(@user), method: "PATCH") do %>
+    <div>
+        OW ID : 
+        <%= text_field_tag(:ow_id) %>
+    </div>
+    <%= submit_tag '등록', class: "btn btn-primary" %>
+<% end %>
+<hr/>
+<h5>배틀그라운드</h5>
+<p>ID: <%= @user.pubg_id ? @user.pubg_id : '배틀그라운드를 연동해주세요!'%> </p>
+
+<%= form_tag(game_link_update_path(@user), method: "PATCH") do %>
+    <div>
+        PUBG ID : 
+        <%= text_field_tag(:pubg_id) %>
+    </div>
+    <%= submit_tag '등록', class: "btn btn-primary" %>
+<% end %>
+<br><br/>
+<h3>연동한 게임을 확인하세요</h3>
+<br/>
+<script>
+$(document).ready(function(){
+    
+    $.ajax({
+        header:{"X-Riot-Token": "RGAPI-c53fac76-5623-4971-b518-9920731888a4"},
+        url:'https://kr.api.riotgames.com/lol/summoner/v3/summoners/by-name/hide%20on%20bush?api_key=RGAPI-c53fac76-5623-4971-b518-9920731888a4',
+        type:'GET',
+        success:function(data){
+            console.log(data)
+        }
+    })
+
+})
+    
+</script>

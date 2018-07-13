@@ -39,6 +39,19 @@ class UsersController < ApplicationController
             redirect_to :back, flash: {success: "로그인 실패"}
         end
     end
+    
+    def game_link
+        @user = User.find(session[:sign_in_user])
+    end
+    
+    def user_game_link
+       if current_user.update({lol_id: params[:lol_id]})
+           redirect_back(fallback_location: root_path, flash: {success: "연동 성공"})
+       else
+           redirect_back(fallback_location: root_path, flash: {success: "연동 실패"})
+       end
+    end
+    
     # 로그 아웃
     def sign_out
         session.delete(:sign_in_user)
@@ -57,14 +70,6 @@ class UsersController < ApplicationController
         else
             redirect_to :back, notice: 'Could not change user info'
         end
-    end
-    
-    
-    # 게임 추가 페이지
-    def add_game
-    end
-    # 게임 추가 로직
-    def user_add_game
     end
 
 private

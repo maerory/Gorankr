@@ -10,19 +10,31 @@ Rails.application.routes.draw do
   delete 'sign_out' => 'users#sign_out'
   get '/:user_name' => 'users#user_info', as: 'user_info'
   get '/:user_name/edit' => 'users#edit', as: 'user_edit'
+  get '/:user_name/link' => 'users#game_link', as: 'game_link'
+  patch '/:user_name/link' => 'users#user_game_link', as: 'game_link_update'
   patch '/:user_name' => 'users#update', as: 'user_update'
 
   # Routing for game boards
   get '/category/new' => 'categories#new'
   post '/category' => 'categories#create'
+  get '/board/:id/edit' => 'posts#edit', as: 'edit_post'
   get '/board/:game_name' => 'categories#show'
   get '/board/:game_name/new' => 'posts#new', as: 'new_post'
   post '/board/:game_name/' => 'posts#create', as: 'posts'
-  get '/board/:game_name/:id' => 'posts#show'
-  get '/board/:game_name/:id/edit' => 'posts#edit'
-  post '/board/:game_name/:id/' => 'post#update'
-  delete '/board/:game_name/:id' => 'post#destroy'
-
+  get '/board/:game_name/:id' => 'posts#show', as: 'post'
+  patch '/board/:game_name/:id' => 'posts#update', as: 'post_update'
+  delete '/board/:game_name/:id' => 'posts#destroy'
+  # Routing for image upload
+  post '/uploads' => 'posts#upload_image'
+  
+  # Routing for board comments
+  post 'posts/:id/comments' => 'posts#create_comment'
+  delete 'posts/comments/:comment_id' => 'posts#destroy_comment'
+  patch 'posts/comments/:comment_id' => 'posts#update_comment'
+  
+  # Routing for like
+  get '/likes/:post_id' => 'posts#like_post'
+  
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

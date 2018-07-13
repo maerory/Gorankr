@@ -4,8 +4,10 @@ class CategoriesController < ApplicationController
     end
 
     def show
+        @posts = Post.find_by game_name: params[:game_name]
         @category = Category.find_by game_name: params[:game_name]
         session[:current_game_name] = @category.game_name
+        session[:current_category_id] = @category.id
     end
 
     def new

@@ -1,14 +1,96 @@
-<p id="notice"><%= notice %></p>
-
+<h1><%= @post.title %></h1>
+<small>작성자 : <%=current_user.user_name %></small>
+<hr/>
 <p>
-  <strong>Title:</strong>
-  <%= @post.title %>
+  <%= simple_format(@post.content) %>
 </p>
 
-<p>
-  <strong>Content:</strong>
-  <%= @post.content %>
-</p>
+<%= link_to 'Edit', edit_post_path %> |
+<%= link_to 'Back', :back %><br>
 
-<%= link_to 'Edit', edit_post_path(@post) %> |
-<%= link_to 'Back', posts_path %>
+<hr></hr>
+<% if @user_likes_post.nil? %>
+    <button class="btn btn-primary like">좋아요 (<span class="like-count"><%= @post.likes.count %></span>)</button>
+    <% else %>
+    <button class="btn btn-danger like">좋아요 취소 (<span class="like-count"><%= @post.likes.count %></span>)</button>
+<% end %>
+<hr/>
+
+<form class="text-right comment">
+    <input class="form-control comment-content"><br/>
+    <input type="submit" value="댓글쓰기" class="btn btn-success">
+</form><br/>
+<h4>Comments</h4>
+<ul class="list-group comment-list">
+<% @post.comments.reverse_each do |comment| %>
+    <li class="comment-<%= comment.id %> list-group-item d-flex justify-content-between">
+        <span class="comment-user"><%= comment.user_name %></span> :
+        <span class="comment-detail-<%= comment.id %>"><%= comment.content %></span>
+        <div>
+            <button data-id="<%= comment.id %>" class="btn btn-warning text-white edit-comment">수정</button>
+            <button data-id="<%= comment.id %>" class="btn btn-danger destroy-comment">삭제</button>    
+        </div>
+    </li>
+<% end %>
+</ul>
+
+<script>
+$(document).on('ready', function () {
+    $('.like').on('click', function() {
+        $.ajax({ //ajax request to the url, so you have to route
+           //thus, you also have to set the route and attach a method to that route
+           url: '/likes/<%= @post.id %>' 
+        });
+    });
+    
+    $(document).on('submit','.comment', function(e) {
+      e.preventDefault();
+      var comm = $('.comment-content').val()
+      
+      $.ajax({
+        url: "/posts/<%= @post.id %>/comments",
+        method: "POST",
+        data: {
+            content: comm
+        }
+      });
+    });
+    
+    $(document).on('click', '.destroy-comment', function(e) {
+        console.log("Deleted");
+        var comment_id = $(this).attr('data-id');
+        $.ajax({
+            url: "/posts/comments/" + comment_id,
+            method: "DELETE",
+        });
+    });
+    
+    $(document).on('click', '.edit-comment', function(e) {
+        if (document.getElementsByClassName("btn update-comment").length != 0) {
+            alert("이미 수정 중입니다");
+            return;
+        };
+        console.log("수정");
+        var comment_id = $(this).data("id");
+        var edit_comment = $(`.comment-detail-${comment_id}`);
+        var content = edit_comment.text().trim();
+        edit_comment.html(`
+        <input type="text" value="${content}" class="form-control edit-comment-${comment_id}">`);
+        $(this).text("확인").removeClass("edit-comment btn-warning").addClass("update-comment btn-dark");
+    });
+    
+    $(document).on('click', '.update-comment', function() {
+        // find the comment content to update
+        var comment_id = $(this).data("id");
+        // Select the comment box
+        var comment_form = $(`.edit-comment-${comment_id}`);
+        $.ajax({
+            url: "/posts/comments/" + comment_id,
+            method: "PATCH",
+            data: {
+                content: comment_form.val()
+            }
+        });
+    });
+});
+</script>

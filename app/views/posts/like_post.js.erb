@@ -1,0 +1,9 @@
+alert("LIKEY!");
+var like_count = parseInt($('.like-count').text());
+if(<%= @like.frozen? %>) {
+    like_count = like_count - 1
+    $('.like').html(`좋아요 (<span class='like-count'>${like_count}</span>)`).removeClass("btn-danger").addClass("btn-primary");
+} else {
+    like_count = like_count + 1
+    $('.like').html(`좋아요 취소 (<span class='like-count'>${like_count}</span>)`).addClass("btn-danger").removeClass("btn-primary");
+}

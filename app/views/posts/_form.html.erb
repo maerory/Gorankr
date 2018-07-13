@@ -1,14 +1,18 @@
+
 <%= form_for(@post) do |f| %>
 <hr/>
   <%= f.hidden_field :game_name, value: params[:game_name] %>
+  <%= f.hidden_field :user_name, value: current_user.user_name %>
+  
   <div class="field">
     <%= f.label :title %><br>
     <%= f.text_field :title %>
   </div>
   <div class="field">
     <%= f.label :content %><br>
-    <%= f.text_field :content %>
+    <%= f.text_area :content, 'data-provider': :summernote %>
   </div>
+  </br>
   <div class="actions">
     <%= f.submit %>
   </div>
