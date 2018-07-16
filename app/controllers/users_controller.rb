@@ -47,7 +47,10 @@ class UsersController < ApplicationController
     ## 게임 아이디 연동 업데이트 하기
     
     def user_game_link
-       if current_user.update({lol_id: params[:lol_id]})
+       if current_user.update({
+           lol_id: params[:lol_id].nil? ? current_user.lol_id : params[:lol_id], 
+           ow_id: params[:ow_id].nil? ? current_user.ow_id : params[:ow_id], 
+           pubg_id: params[:pubg_id].nil? ? current_user.pubg_id : params[:pubg_id]})
            redirect_back(fallback_location: root_path, flash: {success: "연동 성공"})
        else
            redirect_back(fallback_location: root_path, flash: {success: "연동 실패"})
@@ -55,19 +58,18 @@ class UsersController < ApplicationController
     end
     
     ## LOL API를 호출하는 함수
-    def fetch_lol_api
-        summonerName = current_user.lol_id.gsub(' ', '%20')
-        lol_api_key = "RGAPI-669ca328-ce7f-41d8-b763-87d152886cc1"
-        
+    def fetch_lol_data
         # 먼저 다른 정보를 가져오기 위한 소환사의 summonerId 와 accountId를 가져온다
-        url = "https://kr.api.riotgames.com/lol/summoner/v3/summoners/by-name/#{summonerName}?api_key=" + lol_api_key
+        url = "https://kr.api.riotgames.com/lol/summoner/v3/summoners/by-name/#{current_user.lol_id}?api_key=#{ENV["LOL_API_KEY"]}"
+        url = URI.encode(url)
+ 
         user_lol_info = RestClient.get(url)
         user_lol_info = JSON.parse(user_lol_info)
         @summonerId = user_lol_info["id"]
         @accountId = user_lol_info["accountId"]
         
         # AccountId를 이용해 솔랭 게임의 정보를 가져온다
-        url = "https://kr.api.riotgames.com/lol/match/v3/matchlists/by-account/#{@accountId}?queue=420&api_key=" + lol_api_key
+        url = "https://kr.api.riotgames.com/lol/match/v3/matchlists/by-account/#{@accountId}?queue=420&api_key=#{ENV["LOL_API_KEY"]}"
         user_lol_matches = RestClient.get(url)
         user_lol_matches = JSON.parse(user_lol_matches)
         user_lanes = []
@@ -80,11 +82,25 @@ class UsersController < ApplicationController
         @pos2 = user_lanes[1]
         
         # SummonerId를 이용해 티어를 가져온다
-        url = "https://kr.api.riotgames.com/lol/league/v3/positions/by-summoner/#{@summonerId}?api_key=" + lol_api_key
+        url = "https://kr.api.riotgames.com/lol/league/v3/positions/by-summoner/#{@summonerId}?api_key=#{ENV["LOL_API_KEY"]}"
         user_lol_league = RestClient.get(url)
         user_lol_league = JSON.parse(user_lol_league)
-        p user_lol_league
         @tier = user_lol_league[0]["tier"]
+    end
+    
+    def fetch_pubg_data
+        url = "https://pubg.op.gg/user/bokeyems?server=pc-krjp"
+        page = Nokogiri::HTML(open(url))
+        puts ("asdf")
+        page.css('div .matches-item__my-ranking').each do |n|
+            puts n
+        end
+    end
+    
+    #rankedStatsWrap > div.ranked-stats-wrapper__list > div:nth-child(1) > div > div:nth-child(1) > div > div > div > div > div.ranked-stats__layout.ranked-stats__layout--rank > div > div:nth-child(2) > div.ranked-stats__rating-point
+    
+    def fetch_ow_data
+    
     end
     
     # 로그 아웃
@@ -111,5 +127,4 @@ private
     def user_params
         {password: params[:password], age: params[:age], discord: params[:discord]} 
     end
-
 end
