@@ -42,6 +42,13 @@ gem "mini_magick"
 # nokogiri
 gem "nokogiri"
 
+# json to read json
+gem "json"
+# rest client for api
+gem "rest-client"
+# figaro
+gem 'figaro', '~> 1.1.1'
+
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
   

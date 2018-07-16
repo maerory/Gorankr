@@ -35,6 +35,9 @@ Rails.application.routes.draw do
   # Routing for like
   get '/likes/:post_id' => 'posts#like_post'
   
+  # Routing for ajax fetch lol data
+  get '/fetch/lol' => 'users#fetch_lol_api'
+  
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

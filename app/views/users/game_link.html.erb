@@ -1,3 +1,5 @@
+<!-- 게임을 연동하는 곳 --> 
+
 <h3>게임을 연동하세요</h3>
 <hr>
 <h5>리그오브레전드</h5>
@@ -33,20 +35,23 @@
     <%= submit_tag '등록', class: "btn btn-primary" %>
 <% end %>
 <br><br/>
+
+<!-- 연동한 게임을 확인하는 곳 -->
+
 <h3>연동한 게임을 확인하세요</h3>
+<hr/>
+<h4>리그오브레전드</h4>
+<div class="user_lol_data"></div>
 <br/>
+<h4>오버워치</h4>
+
+
 <script>
 $(document).ready(function(){
-    
     $.ajax({
-        header:{"X-Riot-Token": "RGAPI-c53fac76-5623-4971-b518-9920731888a4"},
-        url:'https://kr.api.riotgames.com/lol/summoner/v3/summoners/by-name/hide%20on%20bush?api_key=RGAPI-c53fac76-5623-4971-b518-9920731888a4',
-        type:'GET',
-        success:function(data){
-            console.log(data)
-        }
-    })
-
+        url:'/fetch/lol',
+        type:'GET'
+    });
 })
     
 </script>

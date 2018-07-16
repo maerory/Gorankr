@@ -24,7 +24,7 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%= current_user.user_name %></a>
             <div class="dropdown-menu" aria-labelledby="dropdown01">
-              <a class="dropdown-item" href="<%= current_user.user_name %>">My Page</a>
+              <a class="dropdown-item" href="/<%= current_user.user_name %>">My Page</a>
               <%= link_to "Sign Out", sign_out_path, method: 'delete', class: 'dropdown-item', data: {confirm: "Are you Sure?"} %>
           </li>
           <% end %>
