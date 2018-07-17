@@ -60,16 +60,16 @@ class UsersController < ApplicationController
     ## LOL API를 호출하는 함수
     def fetch_lol_data
         # 먼저 다른 정보를 가져오기 위한 소환사의 summonerId 와 accountId를 가져온다
-        url = "https://kr.api.riotgames.com/lol/summoner/v3/summoners/by-name/#{current_user.lol_id}?api_key=#{ENV["LOL_API_KEY"]}"
-        url = URI.encode(url)
- 
+        url = URI.encode("https://kr.api.riotgames.com/lol/summoner/v3/summoners/by-name/#{current_user.lol_id}?api_key=#{ENV["LOL_API_KEY"]}")
+        puts url
         user_lol_info = RestClient.get(url)
         user_lol_info = JSON.parse(user_lol_info)
         @summonerId = user_lol_info["id"]
         @accountId = user_lol_info["accountId"]
         
         # AccountId를 이용해 솔랭 게임의 정보를 가져온다
-        url = "https://kr.api.riotgames.com/lol/match/v3/matchlists/by-account/#{@accountId}?queue=420&api_key=#{ENV["LOL_API_KEY"]}"
+        url = URI.encode("https://kr.api.riotgames.com/lol/match/v3/matchlists/by-account/#{@accountId}?queue=420&api_key=#{ENV["LOL_API_KEY"]}")
+        puts url
         user_lol_matches = RestClient.get(url)
         user_lol_matches = JSON.parse(user_lol_matches)
         user_lanes = []
@@ -78,29 +78,39 @@ class UsersController < ApplicationController
         end
         user_lanes = Hash[user_lanes.group_by(&:itself).map {|k,v| [k, v.size] }]
         user_lanes = user_lanes.sort_by {|k, v| v}.reverse
-        @pos1 = user_lanes[0]
-        @pos2 = user_lanes[1]
+        @pos1 = user_lanes[0][0]
+        @pos2 = user_lanes[1][0]
         
         # SummonerId를 이용해 티어를 가져온다
-        url = "https://kr.api.riotgames.com/lol/league/v3/positions/by-summoner/#{@summonerId}?api_key=#{ENV["LOL_API_KEY"]}"
+        url = URI.encode("https://kr.api.riotgames.com/lol/league/v3/positions/by-summoner/#{@summonerId}?api_key=#{ENV["LOL_API_KEY"]}")
+        puts url
         user_lol_league = RestClient.get(url)
         user_lol_league = JSON.parse(user_lol_league)
         @tier = user_lol_league[0]["tier"]
     end
     
     def fetch_pubg_data
-        url = "https://pubg.op.gg/user/bokeyems?server=pc-krjp"
-        page = Nokogiri::HTML(open(url))
-        puts ("asdf")
-        page.css('div .matches-item__my-ranking').each do |n|
-            puts n
-        end
+        # PubG opgg 점수 크롤링 
+        # url = "https://pubg.op.gg/user/bokeyems?server=pc-krjp"
+        # page = Nokogiri::HTML(open(url))
+        # puts ("asdf")
+        # page.css('div .matches-item__my-ranking').each do |n|
+        #     puts n
+        # end
     end
     
-    #rankedStatsWrap > div.ranked-stats-wrapper__list > div:nth-child(1) > div > div:nth-child(1) > div > div > div > div > div.ranked-stats__layout.ranked-stats__layout--rank > div > div:nth-child(2) > div.ranked-stats__rating-point
-    
     def fetch_ow_data
-    
+        ow_id = current_user.ow_id.gsub!("#","-")
+        
+        # 오버와치 점수 가져오기
+        url = URI.encode("https://www.overbuff.com/players/pc/" + ow_id)
+        page = Nokogiri::HTML(open(url))
+        @mmr = page.css("span .player-skill-rating").text
+
+        # 오버와치 포지션 가져오기
+        url = URI.encode("https://www.overbuff.com/players/pc/" + ow_id + "?mode=competitive")
+        page = Nokogiri::HTML(open(url))
+        @pos = page.xpath("/html/body/div[1]/div[3]/div/div[3]/div[2]/div[2]/div/section/article/table/tbody/tr[1]/td[1]/a/img").attr("alt")
     end
     
     # 로그 아웃
