@@ -48,6 +48,8 @@ gem "json"
 gem "rest-client"
 # figaro
 gem 'figaro', '~> 1.1.1'
+# pusher for chat rooms
+gem 'pusher'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development

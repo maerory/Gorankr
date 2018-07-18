@@ -1,7 +1,10 @@
 class UsersController < ApplicationController
     
+    before_action :authenticate_user!, except: [:sign_up, :user_sign_up, :sign_in, :user_sign_in]
+    
     # 큐 버튼?
     def index
+        @players = Player.all
     end
     
     # 마이페이지
@@ -12,6 +15,7 @@ class UsersController < ApplicationController
     # 회원가입 페이지
     def sign_up
     end
+    
     # 회원가입 로직
     def user_sign_up
         @user = User.new(user_name: params[:user_name],
@@ -61,7 +65,7 @@ class UsersController < ApplicationController
     def fetch_lol_data
         # 먼저 다른 정보를 가져오기 위한 소환사의 summonerId 와 accountId를 가져온다
         url = URI.encode("https://kr.api.riotgames.com/lol/summoner/v3/summoners/by-name/#{current_user.lol_id}?api_key=#{ENV["LOL_API_KEY"]}")
-        puts url
+        puts "##########" + url
         user_lol_info = RestClient.get(url)
         user_lol_info = JSON.parse(user_lol_info)
         @summonerId = user_lol_info["id"]
@@ -69,7 +73,6 @@ class UsersController < ApplicationController
         
         # AccountId를 이용해 솔랭 게임의 정보를 가져온다
         url = URI.encode("https://kr.api.riotgames.com/lol/match/v3/matchlists/by-account/#{@accountId}?queue=420&api_key=#{ENV["LOL_API_KEY"]}")
-        puts url
         user_lol_matches = RestClient.get(url)
         user_lol_matches = JSON.parse(user_lol_matches)
         user_lanes = []
@@ -83,7 +86,6 @@ class UsersController < ApplicationController
         
         # SummonerId를 이용해 티어를 가져온다
         url = URI.encode("https://kr.api.riotgames.com/lol/league/v3/positions/by-summoner/#{@summonerId}?api_key=#{ENV["LOL_API_KEY"]}")
-        puts url
         user_lol_league = RestClient.get(url)
         user_lol_league = JSON.parse(user_lol_league)
         @tier = user_lol_league[0]["tier"]
@@ -91,12 +93,11 @@ class UsersController < ApplicationController
     
     def fetch_pubg_data
         # PubG opgg 점수 크롤링 
-        # url = "https://pubg.op.gg/user/bokeyems?server=pc-krjp"
-        # page = Nokogiri::HTML(open(url))
-        # puts ("asdf")
-        # page.css('div .matches-item__my-ranking').each do |n|
-        #     puts n
-        # end
+        url = "https://dak.gg/profile/" + current_user.pubg_id
+        page = Nokogiri::HTML(open(url))
+        @soloMMR = page.xpath('//*[@id="profile"]/div[3]/div[1]/section[1]/div[1]/div[1]/div[2]/span[1]').text
+        @duoMMR = page.xpath('//*[@id="profile"]/div[3]/div[1]/section[2]/div[1]/div[1]/div[2]/span[1]').text
+        @squadMMR = page.xpath('//*[@id="profile"]/div[3]/div[1]/section[3]/div[1]/div[1]/div[2]/span[1]').text
     end
     
     def fetch_ow_data

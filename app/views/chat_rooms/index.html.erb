@@ -1,0 +1,89 @@
+<h1>Chat Rooms</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>인원</th>
+      <th>방장</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody class="chat_room_list">
+    <% @chat_rooms.reverse_each do |chat_room| %>
+      <tr class="room<%= chat_room.id%>">
+        <td><span class="current<%= chat_room.id %>"><%= chat_room.admissions.size %></span> 
+        / <span class="max_count<%= chat_room.id%>"><%= chat_room.max_count %></span></td>
+        <td><%= link_to 'Show', chat_room %></td>
+       </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Chat Room', new_chat_room_path %>
+
+<script>
+$(document).on('ready',function() {
+  // 방이 만들어졌을 때, 방에 대한 데이터를 받아서 방 목록에 추가
+  function room_created(data) {
+    $('.chat_room_list').prepend(`
+      <tr class="room${data.id}">
+        <td><span class="current${data.id}">0</span> 
+        / <span class="max_count${data.id}">${data.max_count}</span></td>
+        <td><a href="/chat_rooms/${data.id}">Show</a></td>
+      </tr>`);
+  };
+  
+  function delete_room(data) {
+    $(`.room${data.id}`).remove();
+  };
+  
+  function edit_room(data) {
+    var max_count = $(`.max_count${data.id}`);
+    title.text(data.title);
+    max_count.text(data.max_count);
+  }
+  
+  function user_joined(data) {
+    var current = $(`.current${data.chat_room_id}`);
+    current.text(parseInt(current.text())+1);
+  };
+  function user_exited(data) {
+    var current = $(`.current${data.chat_room_id}`);
+    current.text(parseInt(current.text())-1);
+  };
+  
+  // Create and authenticate to pusher
+  var pusher = new Pusher('<%= ENV["PUSHER_KEY"]%>', {
+      cluster: "<%= ENV["PUSHER_CLUSTER"]%>",
+      encrypted: true
+    });
+
+  // Create a channel specified to that chat_room
+  var channel = pusher.subscribe('chat_room');
+  
+  // bind these functions to the channel so that pusher can trigger this for all users who is listening to the channel
+  channel.bind('create', function(data) {
+    console.log(data);
+    room_created(data);
+  });
+  channel.bind('join', function(data) {
+    console.log(data);
+    user_joined(data);
+  });
+  channel.bind('update', function(data) {
+    console.log(data);
+    edit_room(data);
+  });
+  channel.bind('exit', function(data) {
+    console.log(data);
+    user_exited(data);
+  });
+  channel.bind('delete', function(data){
+    console.log(data);
+    delete_room(data);
+  });
+});
+</script>

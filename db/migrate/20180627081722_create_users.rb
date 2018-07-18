@@ -8,6 +8,7 @@ class CreateUsers < ActiveRecord::Migration
       t.string :lol_id
       t.string :ow_id
       t.string :pubg_id
+      t.text :banlist
       
       t.timestamps null: false
     end

@@ -1,0 +1,76 @@
+<h1><%= @chat_room.id %></h1>
+<!-- Printing out the list of current members -->
+<h3>Current Chatroom Members</h3>
+<div class="joined_user_list">
+<% @chat_room.users.each do |user| %>
+    <p class="user-<%= user.id %>"><%= user.user_name %></p>
+<% end %>
+</div>
+<hr/>
+
+<!-- Load chatting messages -->
+<% if @chat_room.users.include?(current_user) %>
+    <h4>Chat</h4>
+    <div class="chat_list">
+    <% @chat_room.chats.each do |chat| %>
+        <p><%= chat.user.user_name %>: <%= chat.message %> <small>(<%= chat.created_at %>)</small></p>
+    <% end %>
+    </div>
+<% end %>
+<%= form_tag("/chat_rooms/#{@chat_room.id}/chat", remote: true) do %>
+    <%= text_field_tag :message %>
+<% end %>
+<hr/>
+
+<!-- Chatroom menu bar -->
+<% if @chat_room.users.exclude?(current_user) %>
+    <!-- the condition "remote:true" automatically becomes AJAX -->
+    <span class="join_room">
+    <%= link_to 'Join', join_chat_room_path(@chat_room), method: 'post', remote: true %> |
+    </span>
+<% else %>
+    <%= link_to 'Delete', chat_room_path(@chat_room), method: 'DELETE', data: {confirm: "방을 삭제?"} %> |
+    <%= link_to 'Exit', exit_chat_room_path(@chat_room), method: 'DELETE', remote: true, data: {confirm: "방을 나가기?"} %> |
+<% end %>
+<%= link_to 'Edit', edit_chat_room_path(@chat_room) %> |
+<%= link_to 'Back', chat_rooms_path %>
+
+<script>
+$(document).on('ready', function() {
+    function user_joined(data) {
+        $('.joined_user_list').append(`<p class="user-${data.user_id}">${data.user_name}</p>`)
+        $('.chat_list').append(`<p>${data.user_name} entered this room</p>`);
+    };
+    function user_chat(data) {
+        $('.chat_list').append(`<p>${data.user_name}: ${data.message} <small>(${data.created_at})</small></p>`)
+    };
+    function user_exit(data) {
+        $(`.user-${data.user_id}`).remove();
+        $('.chat_list').append(`<p>${data.user_name} exited this room</p>`);
+    };
+    function delete_room(data) {
+        alert("Room has been deleted!");
+        location.href = "root_path"
+    }
+    
+    var pusher = new Pusher('<%= ENV["PUSHER_KEY"]%>', {
+      cluster: "<%= ENV["PUSHER_CLUSTER"]%>",
+      encrypted: true
+    });
+	// This is different from the index channel because it only applies to user who are currently in the room
+    var channel = pusher.subscribe('chat_room_<%= @chat_room.id %>');
+
+    channel.bind('join', function(data) {
+        console.log(data);
+        user_joined(data);
+    });
+    channel.bind('chat', function(data) {
+        console.log(data);
+        user_chat(data);
+    });
+    channel.bind('exit', function(data) {
+        console.log(data);
+        user_exit(data);
+    });
+});
+</script>

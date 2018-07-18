@@ -1,13 +1,25 @@
 Rails.application.routes.draw do
   #resources :posts
-  root 'users#sign_in'
+  root 'users#index'
+  
+   # Chat room routing
+  post '/chat_rooms/:id/join' => "chat_rooms#user_admit_room", as: 'join_chat_room'
+  post '/chat_rooms/:id/chat' => "chat_rooms#chat", as: "chat_chat_room"
+  delete '/chat_rooms/:id/exit' => "chat_rooms#user_exit_room", as: "exit_chat_room"
+  get '/chat_rooms' => "chat_rooms#index", as: 'chat_rooms'
+  post '/chat_rooms' => 'chat_rooms#create'
+  get '/chat_rooms/new' => 'chat_rooms#new', as: 'new_chat_room'
+  get '/chat_rooms/:id/edit' => 'chat_rooms#edit', as: 'edit_chat_room'
+  get '/chat_rooms/:id' => 'chat_rooms#show', as: 'chat_room'
+  delete '/chat_rooms/:id' => 'chat_rooms#destroy'
 
   # Routing for user menus
-  get 'index' => 'users#index'
-  get 'sign_up' => 'users#sign_up'
-  post 'sign_up' => 'users#user_sign_up'
-  post 'sign_in' => 'users#user_sign_in'
-  delete 'sign_out' => 'users#sign_out'
+  get '/index' => 'users#index'
+  get '/sign_up' => 'users#sign_up'
+  get '/sign_in' => 'users#sign_in'
+  post '/sign_up' => 'users#user_sign_up'
+  post '/sign_in' => 'users#user_sign_in'
+  delete '/sign_out' => 'users#sign_out'
   get '/:user_name' => 'users#user_info', as: 'user_info'
   get '/:user_name/edit' => 'users#edit', as: 'user_edit'
   get '/:user_name/link' => 'users#game_link', as: 'game_link'
@@ -28,9 +40,9 @@ Rails.application.routes.draw do
   post '/uploads' => 'posts#upload_image'
   
   # Routing for board comments
-  post 'posts/:id/comments' => 'posts#create_comment'
-  delete 'posts/comments/:comment_id' => 'posts#destroy_comment'
-  patch 'posts/comments/:comment_id' => 'posts#update_comment'
+  post '/posts/:id/comments' => 'posts#create_comment'
+  delete '/posts/comments/:comment_id' => 'posts#destroy_comment'
+  patch '/posts/comments/:comment_id' => 'posts#update_comment'
   
   # Routing for like
   get '/likes/:post_id' => 'posts#like_post'
@@ -40,7 +52,11 @@ Rails.application.routes.draw do
   get '/fetch/ow' => 'users#fetch_ow_data'
   get '/fetch/pubg' => 'users#fetch_pubg_data'
   
-
+  # Queue matching routes
+  post '/players' => 'players#create'
+  
+ 
+  
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

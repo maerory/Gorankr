@@ -1,1 +1,38 @@
-<%= link_to 'Queue', class:"btn btn-primary" %>
+<h2>너 내 동료가 되어라!</h2>
+<hr/>
+
+
+
+<%= form_tag('/players', method: "POST") do %>
+    <%= select_tag "game_name", 
+    "<option value='lol'>리그오브레전드</option>
+     <option value='pubg'>배틀그라운드</option>
+     <option value='ow'>오버워치</option>".html_safe %>
+    <%= submit_tag "동료 구하기" , class: "btn btn-primary" %>
+<% end %>
+
+<br/><br/>
+<h2>In Queue</h2>
+<hr>
+<table border="2">
+    <tr>
+        <th>User Name</th>
+        <th>Age</th>
+        <th>Game Name</th>
+        <th>Game Data</th>
+        <th>Status</th>
+    </tr>
+    <% @players.each do |player| %>
+    <tr>
+        <td><%= player.user_name %></td>
+        <td><%= player.age %></td>
+        <td><%= player.game_name %></td>
+        <td><%= player.game_data %></td>
+        <td><%= player.online %></td>
+    </tr>
+    <% end %>
+</table>
+
+<script>
+
+</script>
