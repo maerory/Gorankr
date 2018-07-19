@@ -1,5 +1,7 @@
 class PlayersController < ApplicationController
-
+    # 현재 큐를 돌리고 있는 게이머들을 관리하고 큐를 직접 잡아준다.
+    
+    # 큐에 들어갈 유저정보를 담아서 player 모델 데이터를 생성해준다
     def create
         @player = Player.new
         @player.user_name = current_user.user_name
@@ -89,11 +91,77 @@ class PlayersController < ApplicationController
             @player.game_data = {mmr: mmr, pos1: pos}
         end
         
-        if @player.save
-            redirect_to root_path, flash: {success: "큐가 돌아가고 있습니다" }
-        else
-            redirect_to :back, flash: {success: "큐 조인 실패"}
-        end
+        @player.save
     end
 
+    
+    # 2인 큐를 잡아주는 알고리즘
+    def duo_match
+        player = Player.find_by_user_name(current_user.user_name)
+        Player.where(game_name: player.game_name).all.each do |other_player|
+            if (player.age - other_player.age).abs > 3 || player.game_name != other_player.game_name
+                next
+            end
+            
+            if (player.game_data["mmr"] - other_player.game_data["mmr"]).abs > 200
+                next
+            end
+            
+            # 플레이어들 넣어줄 채팅방 만들기
+            @chat_room = ChatRoom.new
+            matched_player = User.find_by_user_name(other_player.user_name)
+            # 플레이어 어드미션 만들어주기
+            Admission.create({:chat_room => @chat_room.id, :user => current_user.id})
+            Admission.create({:chat_room => @chat_room.id, :user => matched_player.id})
+            # 채팅방으로 리다이렉트 해주기
+            Pusher.trigger("user_#{current_user.id}", 'match', self.as_json)
+            Pusher.trigger("user_#{matched_player.id}", 'match', self.as_json)
+            # 플레이어 데이터 삭제하기
+            Player.destroy
+            other_player.destroy
+            break
+        end
+    end
+    
+    # 롤 5인큐를 잡아주는 알고리즘
+    def team_match_lol
+        player = Player.find_by_user_name(current_user.user_name)
+        team = [player]
+        roles = [player.game_data["pos1"]]
+        Player.where(game_name: "lol").all.each do |other_player|
+            if (player.age - other_player.age).abs < 3 && other_player.game_name == "lol" && (player.game_data["mmr"] - other_player.game_data["mmr"]).abs < 200 && roles.exclude?(other_player.game_data["pos1"])
+                    roles.push(other_player.game_data["pos1"])
+                    team.push(other_player.user_name)
+            end
+        end
+        if team.length == 5
+            @chat_room = ChatRoom.new
+            team.each do |member|
+                matched_user = User.find_by_user_name(member.user_name)
+                Admission.create({:chat_room => @chat_room.id, :user => matched_user.id})
+                Pusher.trigger("user_#{matched_user.id}", 'match', self.as_json)
+            end
+        end
+    end
+    
+    # 배그 4인큐를 잡아주는 알고리즘
+    def team_match_pubg
+        player = Player.find_by_user_name(current_user.user_name)
+        team = [player]
+        Player.where(game_name: "pubg").all.each do |other_player|
+            if (player.age - other_player.age).abs < 3 && other_player.game_name == "pubg" && (player.game_data["mmr"] - other_player.game_data["mmr"]).abs < 200 && team.length < 4
+                team.push(other_player.user_name)
+            end
+        end
+        if team.length == 4
+                @chat_room = ChatRoom.new
+                team.each do |member|
+                    matched_user = User.find_by_user_name(member.user_name)
+                    Admission.create({:chat_room => @chat_room.id, :user => matched_user.id})
+                    Pusher.trigger("user_#{matched_user.id}", 'match', self.as_json)
+            end
+        end
+    end
+    
+    
 end
