@@ -1,17 +1,14 @@
 <h2>너 내 동료가 되어라!</h2>
 <hr/>
-
-
-
 <%= form_tag('/players', method: "POST", remote: true) do %>
     <%= select_tag "game_name", 
     "<option value='lol'>리그오브레전드</option>
      <option value='pubg'>배틀그라운드</option>
      <option value='ow'>오버워치</option>".html_safe %>
-    <%= submit_tag "동료 구하기" , class: "btn btn-primary" %>
+    <%= submit_tag "게임 설정" , class: "btn btn-primary" %>
 <% end %>
 
-
+<div class="match_type"></div>
 
 <br/><br/>
 <h2>In Queue</h2>
@@ -22,7 +19,7 @@
         <th>Age</th>
         <th>Game Name</th>
         <th>Game Data</th>
-        <th>Status</th>
+        <th>Update</th>
     </tr>
     <% @players.each do |player| %>
     <tr>
@@ -30,38 +27,84 @@
         <td><%= player.age %></td>
         <td><%= player.game_name %></td>
         <td><%= player.game_data %></td>
-        <td><%= player.online %></td>
+        <td><%= player.updated_at %></td>
     </tr>
     <% end %>
 </table>
 
 <script>
 $(document).on('ready', function() {
-
+    
+    // Check online status of a player and updates the connection time
+    // setInterval(function () {
+    //     console.log("Updating player time");
+    //     $.ajax({
+    //         url: "/players/update",
+    //         method: "PATCH",
+    //     });
+    // }, 5000);
+    
     var pusher = new Pusher('<%= ENV["PUSHER_KEY"]%>', {
       cluster: "<%= ENV["PUSHER_CLUSTER"]%>",
       encrypted: true
     });
 
     var channel = pusher.subscribe('user_<%= current_user.id %>');
-
-    function user_matched(data) {
-        location.href = `/chat_rooms/${data.chat_room_id}`
-    };
-    
+        
     channel.bind('match', function(data) {
         console.log(data);
-        user_matched(data);
+        if (confirm("찾았습니다! 수락하시겠습니까?")) {
+            var pusher = new Pusher('<%= ENV["PUSHER_KEY"]%>', {
+                cluster: "<%= ENV["PUSHER_CLUSTER"]%>",
+                encrypted: true
+            });
+            var accept_channel = pusher.subscribe('presence-' + data.join('_'));
+            
+            channel.bind('pusher:member_added', function(member) {
+                var count = accept_channel.members.count
+                if (count == data.length) {
+                    console.log("All member accept. Send to CHATROOM");
+                    $.ajax({
+                        url: "/queue/chatroom",
+                        method: "POST",
+                        data: {
+                            data: data    
+                        }
+                    });
+                };
+            });
+        };
     });
-    
-    pusher.connection.bind('unavailable', function() {
-        <% puts "unavailable" %>
-        <% Player.find_by_user_name(current_user.user_name).try(:destroy) %>
+});
+
+$(document).on('click', '.lol_duo', function() {
+    $.ajax({
+        url: "/queue/lol_duo",
+        method: "POST",
     });
-    
-    pusher.connection.bind('disconnected', function() {
-        <% puts "disconnected" %>
-        <% Player.find_by_user_name(current_user.user_name).try(:destroy) %>
+});
+$(document).on('click', '.lol_squad', function() {
+    $.ajax({
+        url: "/queue/lol_squad",
+        method: "POST",
+    });
+});
+$(document).on('click', '.pubg_duo', function() {
+    $.ajax({
+        url: "/queue/pubg_duo",
+        method: "POST",
+    });
+});
+$(document).on('click', '.pubg_squad', function() {
+    $.ajax({
+        url: "/queue/pubg_squad",
+        method: "POST",
+    });
+});
+$(document).on('click', '.ow_duo', function() {
+    $.ajax({
+        url: "/queue/pw_duo",
+        method: "POST",
     });
 });
 

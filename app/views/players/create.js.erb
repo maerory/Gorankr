@@ -1,1 +1,9 @@
-console.log("Player is in queue");
+console.log("Player inserted into queue");
+
+<% if @player.game_name.eql?("lol") %>
+    $('.match_type').html('<button class="btn btn-dark lol_duo">Duo</button> &nbsp;<button class="btn btn-dark lol_squad">Squad</button>')
+<% elsif @player.game_name.eql?("pubg") %>
+    $('.match_type').html('<button class="btn btn-dark pubg_duo">Duo</button>&nbsp;<button class="btn btn-dark pubg_squad">Squad</button>')
+<% elsif @player.game_name.eql?("ow") %>
+    $('.match_type').html('<button class="btn btn-dark ow_duo">Duo</button>&nbsp;<button class="btn btn-dark ow_squad">Squad</button>')
+<% end %>

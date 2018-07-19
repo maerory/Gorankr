@@ -5,6 +5,7 @@ class UsersController < ApplicationController
     # 큐 버튼?
     def index
         @players = Player.all
+        @player = Player.find_by_user_name(current_user.user_name)
     end
     
     # 마이페이지

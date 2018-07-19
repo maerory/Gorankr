@@ -6,8 +6,7 @@ class CreatePlayers < ActiveRecord::Migration[5.0]
       t.integer :age
       t.string :game_name
       t.text :game_data
-      t.boolean :online
-      t.string :game_type
+      t.boolean :team_queue, default: false
       
       t.timestamps
     end

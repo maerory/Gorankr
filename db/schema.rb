@@ -28,7 +28,6 @@ ActiveRecord::Schema.define(version: 20180717112711) do
   end
 
   create_table "chat_rooms", force: :cascade do |t|
-    t.integer  "max_count"
     t.integer  "admissions_count", default: 0
     t.datetime "created_at",                   null: false
     t.datetime "updated_at",                   null: false
@@ -70,7 +69,6 @@ ActiveRecord::Schema.define(version: 20180717112711) do
     t.integer  "age"
     t.string   "game_name"
     t.text     "game_data"
-    t.boolean  "online"
     t.string   "game_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
