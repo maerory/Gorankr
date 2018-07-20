@@ -36,13 +36,13 @@
 $(document).on('ready', function() {
     
     // Check online status of a player and updates the connection time
-    // setInterval(function () {
-    //     console.log("Updating player time");
-    //     $.ajax({
-    //         url: "/players/update",
-    //         method: "PATCH",
-    //     });
-    // }, 5000);
+    setInterval(function () {
+        console.log("Updating player time");
+        $.ajax({
+            url: "/players/update",
+            method: "PATCH",
+        });
+    }, 5000);
     
     var pusher = new Pusher('<%= ENV["PUSHER_KEY"]%>', {
         cluster: "<%= ENV["PUSHER_CLUSTER"]%>",
@@ -122,6 +122,11 @@ $(document).on('click', '.ow_duo', function() {
         url: "/queue/pw_duo",
         method: "POST",
     });
+});
+$(document).on('click', '.btn-dark', function() {
+    setTimeout(function() {
+        alert("현재 비슷한 플레이어를 찾을 수 없습니다")
+    }, 30000);
 });
 
 </script>

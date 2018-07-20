@@ -1,5 +1,5 @@
 class PlayersController < ApplicationController
-    # before_action :filter_players, only: [:duo_match, :team_match_lol, :team_match_pubg]
+    before_action :filter_players, only: [:duo_match, :team_match_lol, :team_match_pubg]
     before_action :update_match_status, only: [:team_match_lol, :team_match_pubg]
     # 현재 큐를 돌리고 있는 게이머들을 관리하고 큐를 직접 잡아준다.
     
@@ -105,7 +105,7 @@ class PlayersController < ApplicationController
     
     # 최근 업데이트 되지 않은 플레이어들은 다 삭제해 주기
     def filter_players
-        Player.where('updated_at > ?', 1.minute.ago)
+        Player.where(updated_at: 30.seconds.ago..Time.now).destroy_all
     end
     
     # 플레이어가 스쿼드 매칭을 찾는다고 변경해줌
@@ -143,13 +143,8 @@ class PlayersController < ApplicationController
             if (player.age - other_player.age).abs > 3
                 next
             end
-            if (player.game_data["mmr"].to_i - other_player.game_data["mmr"].to_i).abs > 200
+            if (player.game_data[:mmr] - other_player.game_data[:mmr]).abs > 250
                 next
-            end
-            if player.game_data.key?("pos1")
-                if player.game_data["pos1"].eql?(other_player.game_data["pos1"])
-                    next
-                end
             end
             duo.push(other_player)
             break
@@ -159,7 +154,6 @@ class PlayersController < ApplicationController
             duo.each do |member|
                 channel_members.push(member.user_name)
             end
-            puts channel_members
             duo.each do |member|
                 matched_user = User.find_by_user_name(member.user_name)
                 Pusher.trigger("user_#{matched_user.id}", 'match', channel_members.as_json)
@@ -171,10 +165,10 @@ class PlayersController < ApplicationController
     def team_match_lol
         player = Player.find_by_user_name(current_user.user_name)
         team = [player]
-        roles = [player.game_data["pos1"]]
+        roles = [player.game_data[:pos1]]
         Player.where.not(user_name: player.user_name).where(game_name: "lol").all.each do |other_player|
-            if (player.age - other_player.age).abs < 3 && other_player.game_name == "lol" && (player.game_data["mmr"].to_i - other_player.game_data["mmr"].to_i).abs < 200 && roles.exclude?(other_player.game_data["pos1"])
-                    roles.push(other_player.game_data["pos1"])
+            if (player.age - other_player.age).abs < 3 && other_player.game_name == "lol" && (player.game_data[:mmr].to_i - other_player.game_data[:mmr].to_i).abs < 200 && roles.exclude?(other_player.game_data[:pos1])
+                    roles.push(other_player.game_data[:mmr])
                     team.push(other_player)
             end
         end
@@ -195,7 +189,7 @@ class PlayersController < ApplicationController
         player = Player.find_by_user_name(current_user.user_name)
         team = [player]
         Player.where(game_name: "pubg").all.each do |other_player|
-            if (player.age - other_player.age).abs < 3 && other_player.game_name == "pubg" && (player.game_data["mmr"].to_i - other_player.game_data["mmr"].to_i).abs < 200 && team.length < 4
+            if (player.age - other_player.age).abs < 3 && other_player.game_name == "pubg" && (player.game_data[:mmr].to_i - other_player.game_data[:mmr].to_i).abs < 200 && team.length < 4
                 team.push(other_player)
             end
         end
