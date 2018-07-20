@@ -57,7 +57,7 @@ class PlayersController < ApplicationController
             else
                 mmr = tier_table[tier] - rank.length * 100 + lp
             end
-            @player.game_data = {mmr: mmr, pos1: pos1, pos2: pos2 }
+            @player.game_data = {mmr: mmr, pos1: pos1}
         end
         
         if @player.game_name == "pubg"
@@ -116,36 +116,42 @@ class PlayersController < ApplicationController
     
     # 플레이어들을 채팅방에 연결해줌
     def link_players
-        
+        room_name =  params[:team].join('')
+        puts room_name
+        # 플레이어들 넣어줄 채팅방 만들기
+        if ChatRoom.where(title: room_name).empty?
+            @chat_room = ChatRoom.create(title: room_name)
+            Player.find_by_user_name(current_user.user_name).destroy
+            Admission.create(user_id: current_user.id, chat_room_id: @chat_room.id)
+            Pusher.trigger("user_#{current_user.id}", 'link', {:id => @chat_room.id}.as_json )
+        else
+            chat_room = ChatRoom.find_by! title: room_name
+            # 플레이어 데이터 삭제
+            Player.find_by_user_name(current_user.user_name).destroy
+            # 플레이어 어드미션 만들어주기
+            Admission.create(user_id: current_user.id, chat_room_id: chat_room.id)
+            # 채팅방으로 리다이렉트 해주기
+            Pusher.trigger("user_#{current_user.id}", 'link', {:id => chat_room.id}.as_json )
+        end
     end
     
     # 2인 큐를 잡아주는 알고리즘
     def duo_match
         player = Player.find_by_user_name(current_user.user_name)
         duo = [player]
-        Player.where(game_name: player.game_name).all.each do |other_player|
-            if (player.age - other_player.age).abs > 3 || player.game_name != other_player.game_name
+        Player.where.not(user_name: player.user_name).where(game_name: player.game_name).all.each do |other_player|
+            if (player.age - other_player.age).abs > 3
                 next
             end
-            
             if (player.game_data["mmr"].to_i - other_player.game_data["mmr"].to_i).abs > 200
                 next
             end
-            
+            if player.game_data.key?("pos1")
+                if player.game_data["pos1"].eql?(other_player.game_data["pos1"])
+                    next
+                end
+            end
             duo.push(other_player)
-            
-            # 플레이어들 넣어줄 채팅방 만들기
-            # @chat_room = ChatRoom.new
-            # matched_player = User.find_by_user_name(other_player.user_name)
-            # # 플레이어 어드미션 만들어주기
-            # Admission.create({:chat_room => @chat_room.id, :user => current_user.id})
-            # Admission.create({:chat_room => @chat_room.id, :user => matched_player.id})
-            # # 채팅방으로 리다이렉트 해주기
-            # Pusher.trigger("user_#{current_user.id}", 'match', self.as_json)
-            # Pusher.trigger("user_#{matched_player.id}", 'match', self.as_json)
-            # # 플레이어 데이터 삭제하기
-            # Player.destroy
-            # other_player.destroy
             break
         end
         if duo.length == 2
@@ -153,9 +159,10 @@ class PlayersController < ApplicationController
             duo.each do |member|
                 channel_members.push(member.user_name)
             end
+            puts channel_members
             duo.each do |member|
-                matched_player = User.find_by_user_name(member.user_name)
-                Pusher.trigger("user_#{matched_player.id}", 'match', channel_members.as_json)
+                matched_user = User.find_by_user_name(member.user_name)
+                Pusher.trigger("user_#{matched_user.id}", 'match', channel_members.as_json)
             end
         end
     end
@@ -165,18 +172,20 @@ class PlayersController < ApplicationController
         player = Player.find_by_user_name(current_user.user_name)
         team = [player]
         roles = [player.game_data["pos1"]]
-        Player.where(game_name: "lol").all.each do |other_player|
+        Player.where.not(user_name: player.user_name).where(game_name: "lol").all.each do |other_player|
             if (player.age - other_player.age).abs < 3 && other_player.game_name == "lol" && (player.game_data["mmr"].to_i - other_player.game_data["mmr"].to_i).abs < 200 && roles.exclude?(other_player.game_data["pos1"])
                     roles.push(other_player.game_data["pos1"])
-                    team.push(other_player.user_name)
+                    team.push(other_player)
             end
         end
         if team.length == 5
-            @chat_room = ChatRoom.new
+            channel_members = Array.new
+            team.each do |member|
+                channel_members.push(member.user_name)
+            end
             team.each do |member|
                 matched_user = User.find_by_user_name(member.user_name)
-                Admission.create({:chat_room => @chat_room.id, :user => matched_user.id})
-                Pusher.trigger("user_#{matched_user.id}", 'match', self.as_json)
+                Pusher.trigger("user_#{matched_user.id}", 'match', channel_members.as_json)
             end
         end
     end
@@ -187,19 +196,19 @@ class PlayersController < ApplicationController
         team = [player]
         Player.where(game_name: "pubg").all.each do |other_player|
             if (player.age - other_player.age).abs < 3 && other_player.game_name == "pubg" && (player.game_data["mmr"].to_i - other_player.game_data["mmr"].to_i).abs < 200 && team.length < 4
-                team.push(other_player.user_name)
+                team.push(other_player)
             end
         end
         if team.length == 4
-                @chat_room = ChatRoom.new
-                team.each do |member|
-                    matched_user = User.find_by_user_name(member.user_name)
-                    Admission.create({:chat_room => @chat_room.id, :user => matched_user.id})
-                    Pusher.trigger("user_#{matched_user.id}", 'match', self.as_json)
+            channel_members = Array.new
+            team.each do |member|
+                channel_members.push(member.user_name)
+            end
+            team.each do |member|
+                matched_user = User.find_by_user_name(member.user_name)
+                Pusher.trigger("user_#{matched_user.id}", 'match', channel_members.as_json)
             end
         end
     end
-    
-    
     
 end

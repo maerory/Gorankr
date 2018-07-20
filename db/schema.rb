@@ -28,6 +28,7 @@ ActiveRecord::Schema.define(version: 20180717112711) do
   end
 
   create_table "chat_rooms", force: :cascade do |t|
+    t.string   "title"
     t.integer  "admissions_count", default: 0
     t.datetime "created_at",                   null: false
     t.datetime "updated_at",                   null: false
@@ -69,9 +70,9 @@ ActiveRecord::Schema.define(version: 20180717112711) do
     t.integer  "age"
     t.string   "game_name"
     t.text     "game_data"
-    t.string   "game_type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.boolean  "team_queue", default: false
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
   end
 
   create_table "posts", force: :cascade do |t|

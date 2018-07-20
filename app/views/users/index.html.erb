@@ -45,8 +45,13 @@ $(document).on('ready', function() {
     // }, 5000);
     
     var pusher = new Pusher('<%= ENV["PUSHER_KEY"]%>', {
-      cluster: "<%= ENV["PUSHER_CLUSTER"]%>",
-      encrypted: true
+        cluster: "<%= ENV["PUSHER_CLUSTER"]%>",
+        encrypted: true,
+        auth: {
+            headers: {
+            'X-CSRF-Token': "<%= form_authenticity_token %>"
+            }
+        }
     });
 
     var channel = pusher.subscribe('user_<%= current_user.id %>');
@@ -54,27 +59,38 @@ $(document).on('ready', function() {
     channel.bind('match', function(data) {
         console.log(data);
         if (confirm("찾았습니다! 수락하시겠습니까?")) {
-            var pusher = new Pusher('<%= ENV["PUSHER_KEY"]%>', {
-                cluster: "<%= ENV["PUSHER_CLUSTER"]%>",
-                encrypted: true
-            });
-            var accept_channel = pusher.subscribe('presence-' + data.join('_'));
+            console.log(data.join(''));
             
-            channel.bind('pusher:member_added', function(member) {
-                var count = accept_channel.members.count
-                if (count == data.length) {
-                    console.log("All member accept. Send to CHATROOM");
+            var accept_channel = pusher.subscribe('presence-' + data.join(''));
+            accept_channel.bind('pusher:member_added', function(member) {
+                console.log("Accept count at " + accept_channel.members.count);
+            });
+            
+            setTimeout(function() {
+                console.log(accept_channel.members.count);
+                if (accept_channel.members.count == data.length) {
+                    console.log("ajax to link")
                     $.ajax({
-                        url: "/queue/chatroom",
+                        url: "/queue/link",
                         method: "POST",
                         data: {
-                            data: data    
+                            team: data,
                         }
                     });
-                };
-            });
-        };
+                } else {
+                    console.log("Not all accepted")
+                }
+            }, 12000);
+        } else {
+            alert("매칭 거절");
+            location.reload();
+        }
     });
+    
+    channel.bind('link', function(data) {
+        console.log("Now linking");
+        location.href = `/chat_rooms/${data["id"]}` 
+    })
 });
 
 $(document).on('click', '.lol_duo', function() {

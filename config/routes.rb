@@ -42,7 +42,7 @@ Rails.application.routes.draw do
   # Routing for board comments
   post '/posts/:id/comments' => 'posts#create_comment'
   delete '/posts/comments/:comment_id' => 'posts#destroy_comment'
-  patch '/posts/mcomments/:comment_id' => 'posts#update_comment'
+  patch '/posts/comments/:comment_id' => 'posts#update_comment'
   
   # Routing for like
   get '/likes/:post_id' => 'posts#like_post'
@@ -60,6 +60,10 @@ Rails.application.routes.draw do
   post '/queue/pubg_duo' => 'players#duo_match'
   post '/queue/pubg_squad' => 'players#team_match_pubg'
   post '/queue/ow_duo' => 'players#duo_match'
+  post '/queue/link' => 'players#link_players'
+  
+  # Pusher authentication for presence channel
+  post '/pusher/auth' => 'pusher#auth'
   
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

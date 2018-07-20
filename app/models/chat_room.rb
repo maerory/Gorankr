@@ -2,6 +2,8 @@ class ChatRoom < ApplicationRecord
     has_many :admissions
     has_many :users, through: :admissions
     has_many :chats
+    
+    validates_uniqueness_of :title
 
     after_commit :create_chat_room_notification, on: :create
     after_commit :edit_chat_room_notification, on: :update
